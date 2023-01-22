@@ -14,7 +14,8 @@ pipe = create_pipeline(text=text, title=title, lang=lang, kp_count=kp_count)
 
 for i in range(len(_FILES)):
     with open(_PATH + _FILES[i], 'w', encoding='utf-8') as fout:
-        for item in pipe[i]:
+        tmp = list(dict.fromkeys(pipe[i]))
+        for item in tmp:
             if isinstance(item, tuple):
                 fout.write(str(item[0]) + '\n')
             else:
