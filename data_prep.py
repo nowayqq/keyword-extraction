@@ -21,4 +21,6 @@ def get_data(path):
     if title == '':
         title = None
 
+    fin.close()
+
     return title, text

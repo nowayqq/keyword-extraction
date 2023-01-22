@@ -1,70 +1,22 @@
-import yake
-import spacy
-
-from sklearn.pipeline import Pipeline
+from data_prep import get_data
+from pipeline import create_pipeline
 
 
-def get_verbs(text, title, lang):
-    full_text = text
+_PATH = 'data/'
+_FILENAME = 'text.txt'
+_FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
 
-    if title is not None:
-        if title[-1] == ' ':
-            title = title[:-1]
-        if title[-1] == '.':
-            full_text = title + " " + text
-        else:
-            full_text = title + ". " + text
+lang = 'ru'
+kp_count = 1
 
-    if lang == 'ru':
-        nlp = spacy.load('ru_core_news_md')
-    else:
-        nlp = spacy.load('en_core_web_md')
+title, text = get_data(_PATH + _FILENAME)
+pipe = create_pipeline(text=text, title=title, lang=lang, kp_count=kp_count)
 
-    doc = nlp(full_text)
-    return [token.lemma_ for token in doc if token.pos_ == "VERB"]
-
-
-def get_keywords(text, title, lang):
-    full_text = text
-
-    if title is not None:
-        if title[-1] == ' ':
-            title = title[:-1]
-        if title[-1] == '.':
-            full_text = title + " " + text
-        else:
-            full_text = title + ". " + text
-
-    if lang == 'ru':
-        nlp = spacy.load('ru_core_news_md')
-    else:
-        nlp = spacy.load('en_core_web_md')
-
-    doc = nlp(full_text)
-    return [(entity.text, entity.label_) for entity in doc.ents]
-
-
-def get_keyphrases(text, title, lang, kp_count):
-    full_text = text
-
-    if title is not None:
-        if title[-1] == ' ':
-            title = title[:-1]
-        if title[-1] == '.':
-            full_text = title + " " + text
-        else:
-            full_text = title + ". " + text
-
-    kw_extractor = yake.KeywordExtractor(lan=lang, top=kp_count, n=20)
-    return kw_extractor.extract_keywords(full_text)
-
-
-def create_pipeline(
-        text: str, title: str = None, lang: str = 'ru', kp_count: int = 1
-) -> Pipeline:
-    pipeline_steps = [
-        ("keywords", get_keywords(text, title, lang)),
-        ("verbs", get_verbs(text, title, lang)),
-        ("keyphrases", get_keyphrases(text, title, lang, kp_count))
-    ]
-    return Pipeline(steps=pipeline_steps)
+for i in range(len(_FILES)):
+    with open(_PATH + _FILES[i], 'w', encoding='utf-8') as fout:
+        for item in pipe[i]:
+            if isinstance(item, tuple):
+                fout.write(str(item[0]) + '\n')
+            else:
+                fout.write(str(item) + '\n')
+    fout.close()
