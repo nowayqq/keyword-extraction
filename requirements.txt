@@ -3,3 +3,4 @@ yake~=0.4.8
 spacy~=3.5.0
 nltk~=3.8.1
 summa~=1.2.0
+beautifulsoup4~=4.11.1

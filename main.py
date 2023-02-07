@@ -1,12 +1,13 @@
 from data_prep import get_data
 from data_prep import prep_data
+from news_parsers import get_parser
 from pipeline import create_pipeline
 
 
 method = int(input('Choose method: '))
 
 _PATH = 'data/'
-_FILENAME = 'example2.txt'
+_FILENAME = 'example4.txt'
 _FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
 
 lang = 'ru'
@@ -28,3 +29,16 @@ for i in range(len(_FILES)):
             else:
                 fout.write(str(item) + '\n')
     fout.close()
+
+url = ''
+parsed_news = get_parser(url)
+
+if parsed_news is not None:
+    print(parsed_news[0] + '\n\n' +
+          parsed_news[1] + '\n')
+    tmp_str = ''
+    for item in parsed_news[2]:
+        tmp_str += item + ', '
+    print(tmp_str)
+else:
+    print('Invalid url')
