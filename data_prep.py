@@ -5,7 +5,6 @@ from string import punctuation
 
 
 def get_data(path):
-
     title = None
     text = ''
 
@@ -37,7 +36,6 @@ def is_equal(a, b):
 
 
 def prep_data(data: list):
-
     words = data
 
     unique = [x for x in words if sum(1 for i in words if is_equal(i, x)) == 1]
@@ -49,4 +47,10 @@ def prep_data(data: list):
             unique.append(mul[0])
             mul = []
 
+    try:
+        unique.remove('это')
+    except ValueError:
+        return sorted(unique)
+
     return sorted(unique)
+
