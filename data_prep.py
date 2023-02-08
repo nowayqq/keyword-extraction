@@ -1,31 +1,15 @@
 import codecs
-
+import validators
 from difflib import SequenceMatcher
 from string import punctuation
 
 
-def get_data(path):
-    title = None
-    text = ''
+def isValid(url: str):
 
-    with codecs.open(path, encoding='utf-8') as fin:
-        lines = fin.readlines()
-
-    if 'Title: ' in lines[0]:
-        title = lines[0].replace('\r', '').replace('\n', '')
-        lines.pop(0)
-        title = title.replace('Title: ', '')
-
-    for line in lines:
-        text += line.replace('\r', '').replace('\n', '')
-    text = text.replace('Text: ', '')
-
-    if title == '':
-        title = None
-
-    fin.close()
-
-    return title, text
+    if validators.url(url):
+        return True
+    else:
+        return False
 
 
 def is_equal(a, b):

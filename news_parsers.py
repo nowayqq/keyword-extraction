@@ -52,7 +52,10 @@ def parse_ria(url: str):
     title = raw_text[:re.search(r' - РИА Новости, ', raw_text).start()]
 
     tags = re.sub(r"https?://[^,\s]+,?", "", raw_text)
-    tags = tags[re.search(r'Новостиru-RU Новости 154.796internet-group@rian.ru7 495 645-6601ФГУП МИА «Россия сегодня»\n35360\n3536019201080true19201440true Новости 154.796internet-group@rian.ru7 495 645-6601ФГУП МИА «Россия сегодня»\n35360\n35360', tags).end():]
+    tags = tags[re.search(r'201080true19201440true Новости '
+                          r'154.796internet-group@rian.ru'
+                          r'7 495 645-6601ФГУП МИА «Россия '
+                          r'сегодня»\n35360\n35360', tags).end():]
     tags = tags[:re.search(r'\d{2}:', tags).start()]
     tags = tags.replace('ФГУП МИА «Россия сегодня»\n35360\n35360', '')
 

@@ -1,44 +1,82 @@
-from data_prep import get_data
-from data_prep import prep_data
-from news_parsers import get_parser
-from pipeline import create_pipeline
+import PySimpleGUI as sg
+from data_prep import isValid
 
 
-method = int(input('Choose method: '))
+_LANGUAGES = ['ru', 'en']
+_METHODS = ['1', '2']
 
-_PATH = 'data/'
-_FILENAME = 'example4.txt'
-_FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
+_VARS = {'window': False,
+         'url': '',
+         'method': _METHODS[0],
+         'lang': _LANGUAGES[0]}
 
-lang = 'ru'
-kp_count = 1
+AppFont = ('Roboto', 12)
+sg.theme('black')
 
-title, text = get_data(_PATH + _FILENAME)
-pipe = create_pipeline(text=text, method=method, title=title, lang=lang, kp_count=kp_count)
+layout = [[sg.Combo(_METHODS, size=(20, 0),
+                    enable_events=True, key='-METHOD-',
+                    default_value=_METHODS[0],
+                    background_color='Grey',
+                    text_color='Black',
+                    pad=((36, 0), (10, 0)),
+                    readonly=True,
+                    font=AppFont),
+           sg.Combo(_LANGUAGES, size=(20, 0),
+                    enable_events=True, key='-LANGUAGE-',
+                    default_value=_LANGUAGES[0],
+                    background_color='Grey',
+                    text_color='Black',
+                    pad=((36, 0), (10, 0)),
+                    readonly=True,
+                    font=AppFont)],
+          [sg.Button('LoadURL', font=AppFont, pad=((58, 0), (0, 0)), size=(10, 0)),
+           sg.Input(key='-IN-', pad=((10, 0), (10, 0)), size=(25, 0),
+                    text_color='Black', background_color='Grey',
+                    font=AppFont)],
+          [sg.Button('Exit', font=AppFont, pad=((504, 0), (3, 0)), size=(10, 0))]]
 
-q = []
+_VARS['window'] = sg.Window('Keyword extractor',
+                            layout,
+                            finalize=True,
+                            resizable=True,
+                            location=(0, 0),
+                            element_justification="center",
+                            background_color='#FDF6E3')
 
-for i in range(len(_FILES)):
-    with open(_PATH + _FILES[i], 'w', encoding='utf-8') as fout:
-        tmp = list(dict.fromkeys(pipe[i]))
-        if _FILES[i] == 'keywords.txt' and method == 2:
-            tmp = prep_data(pipe['keywords'])
-        for item in tmp:
-            if isinstance(item, tuple):
-                fout.write(str(item[0]) + '\n')
-            else:
-                fout.write(str(item) + '\n')
-    fout.close()
 
-url = ''
-parsed_news = get_parser(url)
+def updateMethod(method: str):
 
-if parsed_news is not None:
-    print(parsed_news[0] + '\n\n' +
-          parsed_news[1] + '\n')
-    tmp_str = ''
-    for item in parsed_news[2]:
-        tmp_str += item + ', '
-    print(tmp_str)
-else:
-    print('Invalid url')
+    _VARS['method'] = method
+
+
+def updateLanguage(language: str):
+
+    _VARS['lang'] = language
+
+
+def updateURL(url: str):
+
+    if isValid(url):
+        _VARS['url'] = url
+        print('True')
+    elif isValid('https://' + url):
+        _VARS['url'] = 'https://' + url
+        print('True')
+    else:
+        _VARS['url'] = ''
+        print('False')
+    print(_VARS['url'])
+
+
+while True:
+    event, values = _VARS['window'].read(timeout=200)
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    elif event == 'LoadURL':
+        updateURL(values['-IN-'])
+    elif event == '-METHOD-':
+        updateMethod(values['-METHOD-'])
+    elif event == '-LANGUAGE-':
+        updateLanguage(values['-LANGUAGE-'])
+
+_VARS['window'].close()
