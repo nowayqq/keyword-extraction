@@ -1,4 +1,5 @@
 from urllib.request import urlopen
+from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 import re
 
@@ -21,7 +22,10 @@ def get_parser(url: str):
 
 def parse_ria(url: str):
 
-    html = urlopen(url).read()
+    try:
+        html = urlopen(url).read()
+    except HTTPError:
+        return ''
     soup = BeautifulSoup(html, features="html.parser")
 
     for script in soup(["script", "style"]):
@@ -44,7 +48,7 @@ def parse_ria(url: str):
             text = text[:i] + ' ' + text[i:]
         i += 1
 
-    text = text.replace('  ', ' ').replace('&lt;. . . &gt;', '<...>')
+    text = text.replace('  ', ' ').replace('&lt;', '<').replace('&gt;', '>')
 
     while text[-1] != '.':
         text = text[:-1]

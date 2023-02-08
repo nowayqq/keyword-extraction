@@ -1,7 +1,20 @@
-import codecs
 import validators
 from difflib import SequenceMatcher
 from string import punctuation
+
+
+def prep_text(text: str):
+
+    i = 0
+    j = 0
+    result = text
+    while i < len(result):
+        if j >= 62 and result[i] == ' ':
+            result = result[:i] + '\n' + result[i + 1:]
+            j = 0
+        j += 1
+        i += 1
+    return result
 
 
 def tags_to_str(tags: list):
@@ -9,7 +22,7 @@ def tags_to_str(tags: list):
     tags_str = ''
     for tag in tags:
         tags_str += tag + ', '
-    return tags_str[:-2]
+    return tags_str[:-2] + '\n'
 
 
 def isValid(url: str):
