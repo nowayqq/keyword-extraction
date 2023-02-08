@@ -4,6 +4,14 @@ from difflib import SequenceMatcher
 from string import punctuation
 
 
+def tags_to_str(tags: list):
+
+    tags_str = ''
+    for tag in tags:
+        tags_str += tag + ', '
+    return tags_str[:-2]
+
+
 def isValid(url: str):
 
     if validators.url(url):

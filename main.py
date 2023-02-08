@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 from data_prep import isValid
+from data_prep import tags_to_str
 
 
 _LANGUAGES = ['ru', 'en']
@@ -13,7 +14,25 @@ _VARS = {'window': False,
 AppFont = ('Roboto', 12)
 sg.theme('black')
 
-layout = [[sg.Combo(_METHODS, size=(20, 0),
+layout = [[sg.Text(text="qweqweqwe",
+                   key='title',
+                   font=AppFont,
+                   background_color='#FDF6E3',
+                   pad=((0, 0), (10, 0)),
+                   text_color='Black')],
+          [sg.Text(text="qweqweqw",
+                   key='text',
+                   font=AppFont,
+                   background_color='#FDF6E3',
+                   pad=((0, 0), (10, 0)),
+                   text_color='Black')],
+          [sg.Text(text="qweqweq",
+                   key='tags',
+                   font=AppFont,
+                   background_color='#FDF6E3',
+                   pad=((0, 0), (10, 0)),
+                   text_color='Black')],
+          [sg.Combo(_METHODS, size=(20, 0),
                     enable_events=True, key='-METHOD-',
                     default_value=_METHODS[0],
                     background_color='Grey',
@@ -29,7 +48,7 @@ layout = [[sg.Combo(_METHODS, size=(20, 0),
                     pad=((36, 0), (10, 0)),
                     readonly=True,
                     font=AppFont)],
-          [sg.Button('LoadURL', font=AppFont, pad=((58, 0), (0, 0)), size=(10, 0)),
+          [sg.Button('Load URL', key='LoadURL', font=AppFont, pad=((58, 0), (0, 0)), size=(10, 0)),
            sg.Input(key='-IN-', pad=((10, 0), (10, 0)), size=(25, 0),
                     text_color='Black', background_color='Grey',
                     font=AppFont)],
@@ -58,14 +77,10 @@ def updateURL(url: str):
 
     if isValid(url):
         _VARS['url'] = url
-        print('True')
     elif isValid('https://' + url):
         _VARS['url'] = 'https://' + url
-        print('True')
     else:
         _VARS['url'] = ''
-        print('False')
-    print(_VARS['url'])
 
 
 while True:
@@ -78,5 +93,8 @@ while True:
         updateMethod(values['-METHOD-'])
     elif event == '-LANGUAGE-':
         updateLanguage(values['-LANGUAGE-'])
+    # _VARS['window'].Element("title").Update(title)
+    # _VARS['window'].Element("text").Update(text)
+    # _VARS['window'].Element("tags").Update(tags_to_str(tags))
 
 _VARS['window'].close()
