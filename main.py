@@ -1,9 +1,11 @@
 import PySimpleGUI as sg
-from data_prep import isValid
-from data_prep import tags_to_str
 from news_parsers import get_parser
-from data_prep import prep_text
+from data_prep import prep_text, prep_data, isValid, tags_to_str
+from pipeline import create_pipeline
 
+
+_PATH = 'data/'
+_FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
 
 _LANGUAGES = ['ru', 'en']
 _METHODS = ['Method 1', 'Method 2']
@@ -11,14 +13,14 @@ _METHODS = ['Method 1', 'Method 2']
 _VARS = {'window': False,
          'url': '',
          'method': _METHODS[0],
-         'lang': _LANGUAGES[0]}
+         'lang': _LANGUAGES[0],
+         'kp_count': 1,
+         'title': '',
+         'text': '',
+         'tags': []}
 
 AppFont = ('Roboto', 12)
 sg.theme('black')
-
-_TITLE = ''
-_TEXT = ''
-_TAGS = []
 
 layout = [[sg.Text(text="\n",
                    key='title',
@@ -124,6 +126,9 @@ def updateURL(url: str):
             _VARS['window'].Element('Exit1').Update(visible=False)
             _VARS['window'].Element('Exit2').Update(visible=True)
             _VARS['window'].Element('text').Update(font=AppFont)
+            _VARS['title'] = parsed_news[0]
+            _VARS['text'] = parsed_news[1]
+            _VARS['tags'] = parsed_news[2]
     else:
         _VARS['window'].Element("title").Update('\n')
         _VARS['window'].Element("text").Update('Invalid url')
@@ -136,6 +141,23 @@ def updateURL(url: str):
         _VARS['window'].Element('text').Update(font=('Roboto', 32))
 
 
+def processText():
+    pipe = create_pipeline(text=_VARS['text'], method=_VARS['method'],
+                           lang=_VARS['lang'], kp_count=_VARS['kp_count'])
+
+    for i in range(len(_FILES)):
+        with open(_PATH + _FILES[i], 'w', encoding='utf-8') as fout:
+            tmp = list(dict.fromkeys(pipe[i]))
+            if _FILES[i] == 'keywords.txt' and _VARS['method'] == _METHODS[1]:
+                tmp = prep_data(pipe['keywords'])
+            for item in tmp:
+                if isinstance(item, tuple):
+                    fout.write(str(item[0]) + '\n')
+                else:
+                    fout.write(str(item) + '\n')
+        fout.close()
+
+
 while True:
     event, values = _VARS['window'].read(timeout=200)
     if event == sg.WIN_CLOSED or event == 'Exit1' or event == 'Exit2':
@@ -146,5 +168,7 @@ while True:
         updateMethod(values['-METHOD-'])
     elif event == '-LANGUAGE-':
         updateLanguage(values['-LANGUAGE-'])
+    elif event == 'ProcText':
+        processText()
 
 _VARS['window'].close()
