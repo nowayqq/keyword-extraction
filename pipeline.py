@@ -3,9 +3,9 @@ from functions import *
 
 
 def create_pipeline(
-        text: str, method: int = 1, title: str = None, lang: str = 'ru', kp_count: int = 1
+        text: str, method: str = 'Method 1', title: str = None, lang: str = 'ru', kp_count: int = 1
 ) -> Pipeline:
-    if method == 2:
+    if method == 'Method 2':
         pipeline_steps = [
             ("keywords", get_keywords2(text, title, lang)),
             ("verbs", get_verbs(text, title, lang)),

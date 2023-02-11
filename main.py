@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from news_parsers import get_parser
-from data_prep import prep_text, prep_data, isValid, tags_to_str
+from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates
 from pipeline import create_pipeline
 
 
@@ -119,7 +119,7 @@ def updateURL(url: str):
         else:
             _VARS['window'].Element("title").Update(prep_text(parsed_news[0]))
             _VARS['window'].Element("text").Update(prep_text(parsed_news[1]))
-            _VARS['window'].Element("tags").Update(prep_text(tags_to_str(parsed_news[2])))
+            _VARS['window'].Element("tags").Update(prep_text(list_to_str(parsed_news[2]) + '\n'))
             _VARS['window'].Element('-METHOD-').Update(visible=True)
             _VARS['window'].Element('-LANGUAGE-').Update(visible=True)
             _VARS['window'].Element('ProcText').Update(visible=True)
@@ -156,6 +156,20 @@ def processText():
                 else:
                     fout.write(str(item) + '\n')
         fout.close()
+
+    print(pipe['keyphrases'])
+    print(pipe['keywords'])
+    print(pipe['verbs'])
+
+    _VARS['window'].Element('title').Update(font=('Roboto', 12))
+    _VARS['window'].Element('text').Update(font=('Roboto', 12))
+    _VARS['window'].Element('tags').Update(font=('Roboto', 12))
+    _VARS['window'].Element("title").Update(prep_text('Keyphrases: ' + list_to_str(pipe['keyphrases'])))
+    if _VARS['method'] == 'Method 2':
+        _VARS['window'].Element("text").Update(prep_text('Keywords: ' + list_to_str(prep_data(pipe['keywords']))))
+    else:
+        _VARS['window'].Element("text").Update(prep_text('Keywords: ' + list_to_str(del_duplicates(pipe['keywords']))))
+    _VARS['window'].Element("tags").Update(prep_text('Verbs: ' + list_to_str(pipe['verbs'])))
 
 
 while True:

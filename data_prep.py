@@ -17,12 +17,15 @@ def prep_text(text: str):
     return result
 
 
-def tags_to_str(tags: list):
+def list_to_str(lst: list):
 
-    tags_str = ''
-    for tag in tags:
-        tags_str += tag + ', '
-    return tags_str[:-2] + '\n'
+    lst_str = ''
+    for item in lst:
+        if isinstance(item, tuple):
+            lst_str += item[0] + ', '
+        else:
+            lst_str += item + ', '
+    return lst_str[:-2]
 
 
 def isValid(url: str):
@@ -40,9 +43,34 @@ def is_equal(a, b):
     return True
 
 
-def prep_data(data: list):
-    words = data
+def check_words(lst, word):
+    flag = True
+    for item in lst:
+        if word in item:
+            flag = False
+    return flag
 
+
+def del_duplicates(lst):
+    li = []
+    for item in lst:
+        if isinstance(item, tuple):
+            if item[0] not in li and check_words(li, item[0]):
+                li.append(item[0])
+        else:
+            if item not in li:
+                li.append(item)
+    return li
+
+
+def prep_data(data: list):
+
+    words = []
+    for item in data:
+        if isinstance(item, tuple):
+            words.append(item[0])
+        else:
+            words.append(item)
     unique = [x for x in words if sum(1 for i in words if is_equal(i, x)) == 1]
     mul = []
     for word in words:
