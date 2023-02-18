@@ -11,6 +11,8 @@ _FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
 _LANGUAGES = ['ru', 'en']
 _METHODS = ['Method 1', 'Method 2']
 
+_TMPLST = []
+
 _VARS = {'window': False,
          'url': '',
          'method': _METHODS[0],
@@ -68,8 +70,10 @@ layout = [[sg.Text(text="\n",
                      pad=((168, 0), (10, 0)), size=(10, 0), visible=True),
            sg.Button('Process text', key='ProcText', font=AppFont,
                      pad=((286, 0), (10, 0)), size=(25, 0), visible=False)],
-          [sg.Button('Exit', key='Exit2', font=AppFont,
-                     pad=((501, 0), (10, 0)), size=(12, 0), visible=False)]]
+          [sg.Button('Save results', key='SaveRes', font=AppFont, disabled=True,
+                     pad=((384, 0), (10, 0)), size=(12, 0), visible=False),
+           sg.Button('Exit', key='Exit2', font=AppFont,
+                     pad=((1, 0), (10, 0)), size=(12, 0), visible=False)]]
 
 _VARS['window'] = sg.Window('Keyword extractor',
                             layout,
@@ -82,9 +86,11 @@ _VARS['window'] = sg.Window('Keyword extractor',
 
 def updateMethod(method: str):
     _VARS['method'] = method
+    _VARS['window'].Element('SaveRes').Update(disabled=True)
 
 
 def updateLanguage(language: str):
+    _VARS['window'].Element('SaveRes').Update(disabled=True)
     _VARS['lang'] = language
 
 
@@ -97,6 +103,7 @@ def updateInterface(mode: int, any_=None):
         _VARS['window'].Element('-LANGUAGE-').Update(visible=True)
         _VARS['window'].Element('ProcText').Update(visible=True)
         _VARS['window'].Element('Exit1').Update(visible=False)
+        _VARS['window'].Element('SaveRes').Update(visible=True)
         _VARS['window'].Element('Exit2').Update(visible=True)
         _VARS['window'].Element('text').Update(font=AppFont)
         _VARS['title'] = any_[0]
@@ -110,6 +117,7 @@ def updateInterface(mode: int, any_=None):
         _VARS['window'].Element('-LANGUAGE-').Update(visible=False)
         _VARS['window'].Element('ProcText').Update(visible=False)
         _VARS['window'].Element('Exit1').Update(visible=True)
+        _VARS['window'].Element('SaveRes').Update(visible=False)
         _VARS['window'].Element('Exit2').Update(visible=False)
         _VARS['window'].Element('text').Update(font=('Roboto', 32))
         if mode == 2:
@@ -131,6 +139,8 @@ def updateInterface(mode: int, any_=None):
 
 
 def updateURL(url: str):
+
+    _VARS['window'].Element('SaveRes').Update(disabled=True)
     flag = True
     if isValid(url):
         _VARS['url'] = url
@@ -153,6 +163,7 @@ def updateURL(url: str):
 
 
 def saveResults(lst: list):
+    _VARS['window'].Element('SaveRes').Update(disabled=True)
     try:
         with open('data/result.txt', 'a') as f:
             tmp_arr = [_VARS['url'], _VARS['method'], _VARS['title'],
@@ -170,12 +181,12 @@ def saveResults(lst: list):
         os.mkdir('data')
         saveResults(lst)
 
+    return []
+
 
 def processText():
     pipe = create_pipeline(text=_VARS['text'], method=_VARS['method'],
                            lang=_VARS['lang'], kp_count=_VARS['kp_count'])
-
-    lst = []
 
     for i in range(len(_FILES)):
         tmp = list(dict.fromkeys(pipe[i]))
@@ -187,9 +198,9 @@ def processText():
                 tmp_arr.append(item[0])
             else:
                 tmp_arr.append(item)
-        lst.append((tmp_arr, _FILES[i]))
+        _TMPLST.append((tmp_arr, _FILES[i]))
 
-    saveResults(lst)
+    _VARS['window'].Element('SaveRes').Update(disabled=False)
     updateInterface(3, pipe)
 
 
@@ -205,5 +216,7 @@ while True:
         updateLanguage(values['-LANGUAGE-'])
     elif event == 'ProcText':
         processText()
+    elif event == 'SaveRes':
+        _TMPLST = saveResults(_TMPLST)
 
 _VARS['window'].close()
