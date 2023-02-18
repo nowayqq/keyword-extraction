@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from news_parsers import get_parser
-from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates
+from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates, prep_data_for_save
 from pipeline import create_pipeline
 
 
@@ -141,25 +141,41 @@ def updateURL(url: str):
         _VARS['window'].Element('text').Update(font=('Roboto', 32))
 
 
+def saveResults(lst: list):
+
+    tmp_arr = [_VARS['url'], _VARS['method'], _VARS['title'],
+               _VARS['text'], _VARS['tags']]
+
+    for item in lst:
+        tmp_arr.append(item[0])
+
+    save = prep_data_for_save(tmp_arr)
+    with open('data/result.txt', 'a') as f:
+        for item in save:
+            f.write(item+',')
+        f.write('\n\n')
+    f.close()
+
+
 def processText():
     pipe = create_pipeline(text=_VARS['text'], method=_VARS['method'],
                            lang=_VARS['lang'], kp_count=_VARS['kp_count'])
 
-    for i in range(len(_FILES)):
-        with open(_PATH + _FILES[i], 'w', encoding='utf-8') as fout:
-            tmp = list(dict.fromkeys(pipe[i]))
-            if _FILES[i] == 'keywords.txt' and _VARS['method'] == _METHODS[1]:
-                tmp = prep_data(pipe['keywords'])
-            for item in tmp:
-                if isinstance(item, tuple):
-                    fout.write(str(item[0]) + '\n')
-                else:
-                    fout.write(str(item) + '\n')
-        fout.close()
+    lst = []
 
-    print(pipe['keyphrases'])
-    print(pipe['keywords'])
-    print(pipe['verbs'])
+    for i in range(len(_FILES)):
+        tmp = list(dict.fromkeys(pipe[i]))
+        tmp_arr = []
+        if _FILES[i] == 'keywords.txt' and _VARS['method'] == _METHODS[1]:
+            tmp = prep_data(pipe['keywords'])
+        for item in tmp:
+            if isinstance(item, tuple):
+                tmp_arr.append(item[0])
+            else:
+                tmp_arr.append(item)
+        lst.append((tmp_arr, _FILES[i]))
+
+    saveResults(lst)
 
     _VARS['window'].Element('title').Update(font=('Roboto', 12))
     _VARS['window'].Element('text').Update(font=('Roboto', 12))

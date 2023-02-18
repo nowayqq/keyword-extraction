@@ -3,6 +3,20 @@ from difflib import SequenceMatcher
 from string import punctuation
 
 
+def prep_data_for_save(lst: list):
+
+    res = []
+    for i in range(4):
+        res.append(lst[i])
+    lst = lst[4:]
+    for item in lst:
+        tmp_str = ''
+        for sub_item in item:
+            tmp_str += sub_item + ','
+        res.append(tmp_str[:-1])
+    return res
+
+
 def prep_text(text: str):
 
     i = 0
