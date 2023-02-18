@@ -153,18 +153,22 @@ def updateURL(url: str):
 
 
 def saveResults(lst: list):
-    tmp_arr = [_VARS['url'], _VARS['method'], _VARS['title'],
-               _VARS['text'], _VARS['tags']]
+    try:
+        with open('data/result.txt', 'a') as f:
+            tmp_arr = [_VARS['url'], _VARS['method'], _VARS['title'],
+                       _VARS['text'], _VARS['tags']]
 
-    for item in lst:
-        tmp_arr.append(item[0])
+            for item in lst:
+                tmp_arr.append(item[0])
 
-    save = prep_data_for_save(tmp_arr)
-    with open('data/result.txt', 'a') as f:
-        for item in save:
-            f.write(item+'|')
-        f.write('\n')
-    f.close()
+            save = prep_data_for_save(tmp_arr)
+            for item in save:
+                f.write(item+'|')
+            f.write('\n')
+        f.close()
+    except FileNotFoundError:
+        os.mkdir('data')
+        saveResults(lst)
 
 
 def processText():
