@@ -1,3 +1,4 @@
+import os
 import PySimpleGUI as sg
 from news_parsers import get_parser
 from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates, prep_data_for_save
@@ -61,11 +62,14 @@ layout = [[sg.Text(text="\n",
                     readonly=True,
                     font=AppFont,
                     visible=False)],
-          [sg.Button('Load URL', key='LoadURL', font=AppFont, pad=((0, 0), (10, 0)), size=(10, 0)),
-           sg.Button('Exit', key='Exit1', font=AppFont, pad=((168, 0), (10, 0)), size=(10, 0), visible=True),
-           sg.Button('Process text', key='ProcText', font=AppFont, pad=((286, 0), (10, 0)), size=(25, 0),
-                     visible=False)],
-          [sg.Button('Exit', key='Exit2', font=AppFont, pad=((501, 0), (10, 0)), size=(12, 0), visible=False)]]
+          [sg.Button('Load URL', key='LoadURL', font=AppFont,
+                     pad=((0, 0), (10, 0)), size=(10, 0)),
+           sg.Button('Exit', key='Exit1', font=AppFont,
+                     pad=((168, 0), (10, 0)), size=(10, 0), visible=True),
+           sg.Button('Process text', key='ProcText', font=AppFont,
+                     pad=((286, 0), (10, 0)), size=(25, 0), visible=False)],
+          [sg.Button('Exit', key='Exit2', font=AppFont,
+                     pad=((501, 0), (10, 0)), size=(12, 0), visible=False)]]
 
 _VARS['window'] = sg.Window('Keyword extractor',
                             layout,
@@ -84,6 +88,48 @@ def updateLanguage(language: str):
     _VARS['lang'] = language
 
 
+def updateInterface(mode: int, any_=None):
+    if mode == 0:
+        _VARS['window'].Element("title").Update(prep_text(any_[0]))
+        _VARS['window'].Element("text").Update(prep_text(any_[1]))
+        _VARS['window'].Element("tags").Update(prep_text(list_to_str(any_[2]) + '\n'))
+        _VARS['window'].Element('-METHOD-').Update(visible=True)
+        _VARS['window'].Element('-LANGUAGE-').Update(visible=True)
+        _VARS['window'].Element('ProcText').Update(visible=True)
+        _VARS['window'].Element('Exit1').Update(visible=False)
+        _VARS['window'].Element('Exit2').Update(visible=True)
+        _VARS['window'].Element('text').Update(font=AppFont)
+        _VARS['title'] = any_[0]
+        _VARS['text'] = any_[1]
+        _VARS['tags'] = any_[2]
+
+    elif mode == 1 or mode == 2:
+        _VARS['window'].Element("title").Update('\n')
+        _VARS['window'].Element("tags").Update('')
+        _VARS['window'].Element('-METHOD-').Update(visible=False)
+        _VARS['window'].Element('-LANGUAGE-').Update(visible=False)
+        _VARS['window'].Element('ProcText').Update(visible=False)
+        _VARS['window'].Element('Exit1').Update(visible=True)
+        _VARS['window'].Element('Exit2').Update(visible=False)
+        _VARS['window'].Element('text').Update(font=('Roboto', 32))
+        if mode == 2:
+            _VARS['window'].Element("text").Update('Invalid url')
+        else:
+            _VARS['window'].Element("text").Update('This source has no\nparsers')
+
+    elif mode == 3:
+        _VARS['window'].Element('title').Update(font=('Roboto', 12))
+        _VARS['window'].Element('text').Update(font=('Roboto', 12))
+        _VARS['window'].Element('tags').Update(font=('Roboto', 12))
+        _VARS['window'].Element("title").Update(prep_text('Keyphrases: ' + list_to_str(any_['keyphrases'])))
+        if _VARS['method'] == 'Method 2':
+            _VARS['window'].Element("text").Update(prep_text('Keywords: ' + list_to_str(prep_data(any_['keywords']))))
+        else:
+            _VARS['window'].Element("text").Update(
+                prep_text('Keywords: ' + list_to_str(del_duplicates(any_['keywords']))))
+        _VARS['window'].Element("tags").Update(prep_text('Verbs: ' + list_to_str(any_['verbs'])))
+
+
 def updateURL(url: str):
     flag = True
     if isValid(url):
@@ -97,52 +143,16 @@ def updateURL(url: str):
     if flag:
         parsed_news = get_parser(url)
         if parsed_news is None:
-            _VARS['window'].Element("title").Update('\n')
-            _VARS['window'].Element("text").Update('This source has no\nparsers')
-            _VARS['window'].Element("tags").Update('')
-            _VARS['window'].Element('-METHOD-').Update(visible=False)
-            _VARS['window'].Element('-LANGUAGE-').Update(visible=False)
-            _VARS['window'].Element('ProcText').Update(visible=False)
-            _VARS['window'].Element('Exit1').Update(visible=True)
-            _VARS['window'].Element('Exit2').Update(visible=False)
-            _VARS['window'].Element('text').Update(font=('Roboto', 32))
+            updateInterface(1)
         elif parsed_news == '':
-            _VARS['window'].Element("title").Update('\n')
-            _VARS['window'].Element("text").Update('Invalid url')
-            _VARS['window'].Element("tags").Update('')
-            _VARS['window'].Element('-METHOD-').Update(visible=False)
-            _VARS['window'].Element('-LANGUAGE-').Update(visible=False)
-            _VARS['window'].Element('ProcText').Update(visible=False)
-            _VARS['window'].Element('Exit1').Update(visible=True)
-            _VARS['window'].Element('Exit2').Update(visible=False)
-            _VARS['window'].Element('text').Update(font=('Roboto', 32))
+            updateInterface(2)
         else:
-            _VARS['window'].Element("title").Update(prep_text(parsed_news[0]))
-            _VARS['window'].Element("text").Update(prep_text(parsed_news[1]))
-            _VARS['window'].Element("tags").Update(prep_text(list_to_str(parsed_news[2]) + '\n'))
-            _VARS['window'].Element('-METHOD-').Update(visible=True)
-            _VARS['window'].Element('-LANGUAGE-').Update(visible=True)
-            _VARS['window'].Element('ProcText').Update(visible=True)
-            _VARS['window'].Element('Exit1').Update(visible=False)
-            _VARS['window'].Element('Exit2').Update(visible=True)
-            _VARS['window'].Element('text').Update(font=AppFont)
-            _VARS['title'] = parsed_news[0]
-            _VARS['text'] = parsed_news[1]
-            _VARS['tags'] = parsed_news[2]
+            updateInterface(0, parsed_news)
     else:
-        _VARS['window'].Element("title").Update('\n')
-        _VARS['window'].Element("text").Update('Invalid url')
-        _VARS['window'].Element("tags").Update('')
-        _VARS['window'].Element('-METHOD-').Update(visible=False)
-        _VARS['window'].Element('-LANGUAGE-').Update(visible=False)
-        _VARS['window'].Element('ProcText').Update(visible=False)
-        _VARS['window'].Element('Exit1').Update(visible=True)
-        _VARS['window'].Element('Exit2').Update(visible=False)
-        _VARS['window'].Element('text').Update(font=('Roboto', 32))
+        updateInterface(2)
 
 
 def saveResults(lst: list):
-
     tmp_arr = [_VARS['url'], _VARS['method'], _VARS['title'],
                _VARS['text'], _VARS['tags']]
 
@@ -152,8 +162,8 @@ def saveResults(lst: list):
     save = prep_data_for_save(tmp_arr)
     with open('data/result.txt', 'a') as f:
         for item in save:
-            f.write(item+',')
-        f.write('\n\n')
+            f.write(item+'|')
+        f.write('\n')
     f.close()
 
 
@@ -176,16 +186,7 @@ def processText():
         lst.append((tmp_arr, _FILES[i]))
 
     saveResults(lst)
-
-    _VARS['window'].Element('title').Update(font=('Roboto', 12))
-    _VARS['window'].Element('text').Update(font=('Roboto', 12))
-    _VARS['window'].Element('tags').Update(font=('Roboto', 12))
-    _VARS['window'].Element("title").Update(prep_text('Keyphrases: ' + list_to_str(pipe['keyphrases'])))
-    if _VARS['method'] == 'Method 2':
-        _VARS['window'].Element("text").Update(prep_text('Keywords: ' + list_to_str(prep_data(pipe['keywords']))))
-    else:
-        _VARS['window'].Element("text").Update(prep_text('Keywords: ' + list_to_str(del_duplicates(pipe['keywords']))))
-    _VARS['window'].Element("tags").Update(prep_text('Verbs: ' + list_to_str(pipe['verbs'])))
+    updateInterface(3, pipe)
 
 
 while True:

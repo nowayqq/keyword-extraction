@@ -4,7 +4,6 @@ from string import punctuation
 
 
 def prep_data_for_save(lst: list):
-
     res = []
     for i in range(4):
         res.append(lst[i])
@@ -18,7 +17,6 @@ def prep_data_for_save(lst: list):
 
 
 def prep_text(text: str):
-
     i = 0
     j = 0
     result = text
@@ -32,7 +30,6 @@ def prep_text(text: str):
 
 
 def list_to_str(lst: list):
-
     lst_str = ''
     for item in lst:
         if isinstance(item, tuple):
@@ -43,7 +40,6 @@ def list_to_str(lst: list):
 
 
 def isValid(url: str):
-
     if validators.url(url):
         return True
     else:
@@ -78,7 +74,6 @@ def del_duplicates(lst):
 
 
 def prep_data(data: list):
-
     words = []
     for item in data:
         if isinstance(item, tuple):
@@ -93,7 +88,6 @@ def prep_data(data: list):
         if len(mul) > 1:
             unique.append(mul[0])
             mul = []
-
     try:
         unique.remove('это')
     except ValueError:
