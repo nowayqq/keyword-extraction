@@ -97,7 +97,10 @@ def updateLanguage(language: str):
 def updateInterface(mode: int, any_=None):
     if mode == 0:
         _VARS['window'].Element("title").Update(prep_text(any_[0]))
-        _VARS['window'].Element("text").Update(prep_text(any_[1]))
+        if len(prep_text(any_[1])) > 1500:
+            _VARS['window'].Element("text").Update(prep_text(any_[1])[:1497] + '...')
+        else:
+            _VARS['window'].Element("text").Update(prep_text(any_[1]))
         _VARS['window'].Element("tags").Update(prep_text(list_to_str(any_[2]) + '\n'))
         _VARS['window'].Element('-METHOD-').Update(visible=True)
         _VARS['window'].Element('-LANGUAGE-').Update(visible=True)
