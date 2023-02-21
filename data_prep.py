@@ -94,4 +94,3 @@ def prep_data(data: list):
         return sorted(unique)
 
     return sorted(unique)
-

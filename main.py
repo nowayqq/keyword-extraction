@@ -190,7 +190,7 @@ def saveResults(lst: list):
 
             save = prep_data_for_save(tmp_arr)
             for item in save:
-                f.write(item + '|')
+                f.write(item + '\n\n')
             f.write('\n')
         f.close()
     except FileNotFoundError:

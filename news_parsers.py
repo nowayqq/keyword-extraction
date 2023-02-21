@@ -70,7 +70,7 @@ def parse_ria(url: str):
     tags = tags.replace('РИА Новости Спорт 154.796internet-group@rian.ru'
                         '7 495 645-6601ФГУП МИА «Россия сегодня»\n20660\n20660', '')
 
-    for i in range(len(tags)):
+    for i in range(len(tags) - 1):
         if (tags[i].islower() or tags[i].isdigit() or tags[i] in SYMBOLS) and tags[i + 1].isupper():
             tags = tags[i + 1:]
             break
