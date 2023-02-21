@@ -4,7 +4,6 @@ from news_parsers import get_parser
 from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates, prep_data_for_save
 from pipeline import create_pipeline
 
-
 _PATH = 'data/'
 _FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
 
@@ -84,6 +83,21 @@ _VARS['window'] = sg.Window('Keyword extractor',
                             background_color='#FDF6E3')
 
 
+def _onKeyRelease(key_event):
+    ctrl = (key_event.state & 0x4) != 0
+    if key_event.keycode == 88 and ctrl and key_event.keysym.lower() != "x":
+        key_event.widget.event_generate("<<Cut>>")
+
+    if key_event.keycode == 86 and ctrl and key_event.keysym.lower() != "v":
+        key_event.widget.event_generate("<<Paste>>")
+
+    if key_event.keycode == 67 and ctrl and key_event.keysym.lower() != "c":
+        key_event.widget.event_generate("<<Copy>>")
+
+    if key_event.keycode == 65 and ctrl and key_event.keysym.lower() != "a":
+        key_event.widget.event_generate("<<SelectAll>>")
+
+
 def updateMethod(method: str):
     _VARS['method'] = method
     _VARS['window'].Element('SaveRes').Update(disabled=True)
@@ -142,7 +156,6 @@ def updateInterface(mode: int, any_=None):
 
 
 def updateURL(url: str):
-
     _VARS['window'].Element('SaveRes').Update(disabled=True)
     flag = True
     if isValid(url):
@@ -177,7 +190,7 @@ def saveResults(lst: list):
 
             save = prep_data_for_save(tmp_arr)
             for item in save:
-                f.write(item+'|')
+                f.write(item + '|')
             f.write('\n')
         f.close()
     except FileNotFoundError:
@@ -206,6 +219,8 @@ def processText():
     _VARS['window'].Element('SaveRes').Update(disabled=False)
     updateInterface(3, pipe)
 
+
+_VARS['window'].TKroot.bind_all("<Key>", _onKeyRelease, "+")
 
 while True:
     event, values = _VARS['window'].read(timeout=200)
