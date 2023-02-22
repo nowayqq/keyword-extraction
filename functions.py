@@ -37,9 +37,9 @@ def get_keywords2(text, title, lang):
             text_clean += i + " "
 
     if lang == 'ru':
-        return keywords.keywords (text_clean, language="russian").split("\n")
+        return keywords.keywords(text_clean, language="russian").split("\n")
     else:
-        return keywords.keywords (text_clean, language="english").split("\n")
+        return keywords.keywords(text_clean, language="english").split("\n")
 
 
 def get_keyphrases2(text, title, lang, kp_count):
@@ -56,7 +56,7 @@ def get_keyphrases2(text, title, lang, kp_count):
     stops = get_stops(lang)
 
     rake = Rake(stopwords=stops, max_words=20)
-    return rake.apply(text)[:kp_count]
+    return rake.apply(full_text)[:kp_count]
 
 
 def get_verbs(text, title, lang):

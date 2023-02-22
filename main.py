@@ -1,7 +1,9 @@
 import os
+
 import PySimpleGUI as sg
-from news_parsers import get_parser
+import pymorphy3_dicts_ru
 from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates, prep_data_for_save
+from news_parsers import get_parser
 from pipeline import create_pipeline
 
 _PATH = 'data/'

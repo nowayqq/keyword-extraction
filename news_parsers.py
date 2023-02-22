@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 import re
 
 
-_NEWS_SITES_WITH_PARSERS = ['ria.ru', 'rsport.ria.ru']
+_NEWS_SITES_WITH_PARSERS = ['ria.ru', 'rsport.ria.ru', 'realty.ria.ru']
+_RIA = _NEWS_SITES_WITH_PARSERS[:3]
 SYMBOLS = ['(', ')', '\'', '\"', '*', '!', '.']
 
 
@@ -17,7 +18,7 @@ def get_parser(url: str):
         pass
     if domain not in _NEWS_SITES_WITH_PARSERS:
         return None
-    elif domain in _NEWS_SITES_WITH_PARSERS[0] or domain in _NEWS_SITES_WITH_PARSERS[1]:
+    elif domain in _RIA:
         return parse_ria(url)
 
 
@@ -41,8 +42,14 @@ def parse_ria(url: str):
     raw_text = text
 
     text = re.sub(r"https?://[^,\s]+,?", "", text)
-    text = text[re.search(r'@content \d+ .+ —?-?–?—?–?−?-? РИА Новости. ', text
-                          ).end():re.search(r' Новости (Спорт )?154.796', text).start()]
+    try:
+        text = text[re.search(r'@content \d+ .+ —?-?–?—?–?−?-? РИА (Новости)?'
+                              r'(Недвижимость)?. ', text).end():re.search(
+                              r' Новости (Спорт )?154.796', text).start()]
+    except AttributeError:
+        text = raw_text[re.search(r'@contenthttps://.*.jpg', raw_text).end():
+                        re.search(r' Новости (Спорт )?154.796', raw_text).start()]
+        text = re.sub(r"https?://[^,\s]+,?", "", text)
 
     i = 1
     while i < len(text):
@@ -56,19 +63,22 @@ def parse_ria(url: str):
         text = text[:-1]
 
     try:
-        title = raw_text[:re.search(r' - РИА Новости( Спорт)?, ', raw_text).start()]
+        title = raw_text[:re.search(r' - (Недвижимость )?РИА Новости( Спорт)?, '
+                                    , raw_text).start()]
     except AttributeError:
         title = raw_text[:re.search(r'\nРегистрация пройдена успешно!\nПожалуйста, '
                                     r'перейдите по ссылке из письма,', raw_text).start()]
 
     tags = re.sub(r"https?://[^,\s]+,?", "", raw_text)
-    tags = tags[re.search(r'201080true19201440true Новости (Спорт )?154.796internet-'
-                          r'group@rian.ru7 495 645-6601ФГУП МИА «Россия сегодня»'
-                          r'(\n35360\n35360)?(\n20660\n20660)?', tags).end():]
+    tags = tags[re.search(
+        r'201080true19201440true (РИА )?Новости (Спорт )?'
+        r'154.796internet-group@rian.ru7 495 645-6601ФГУП '
+        r'МИА «Россия сегодня»(\n35360\n35360)?(\n20660\n20660)?'
+        r'(\n42060\n42060)?', tags).end():]
     tags = tags[:re.search(r'\d{2}:', tags).start()]
     tags = tags.replace('ФГУП МИА «Россия сегодня»\n35360\n35360', '')
-    tags = tags.replace('РИА Новости Спорт 154.796internet-group@rian.ru'
-                        '7 495 645-6601ФГУП МИА «Россия сегодня»\n20660\n20660', '')
+    tags = tags.replace('ФГУП МИА «Россия сегодня»\n20660\n20660', '')
+    tags = tags.replace('ФГУП МИА «Россия сегодня»\n42060\n42060', '')
 
     for i in range(len(tags) - 1):
         if (tags[i].islower() or tags[i].isdigit() or tags[i] in SYMBOLS) and tags[i + 1].isupper():
