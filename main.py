@@ -6,8 +6,7 @@ from data_prep import prep_text, prep_data, isValid, list_to_str, del_duplicates
 from news_parsers import get_parser
 from pipeline import create_pipeline
 
-_PATH = 'data/'
-_FILES = ['keywords.txt', 'verbs.txt', 'keyphrases.txt']
+_OUTPARAMS = ['Url', 'Method', 'Title', 'Text', 'Tags', 'Keywords', 'Verbs', 'Keyphrases']
 
 _LANGUAGES = ['ru', 'en']
 _METHODS = ['Method 1', 'Method 2']
@@ -191,8 +190,18 @@ def saveResults(lst: list):
                 tmp_arr.append(item[0])
 
             save = prep_data_for_save(tmp_arr)
+            i = 0
+            if len(save) == 11:
+                flag = 3
+            else:
+                flag = 0
+
             for item in save:
-                f.write(item + '\n\n')
+                if flag:
+                    flag -= 1
+                    continue
+                f.write(_OUTPARAMS[i] + ': ' + item + '\n')
+                i += 1
             f.write('\n')
         f.close()
     except FileNotFoundError:
@@ -206,17 +215,17 @@ def processText():
     pipe = create_pipeline(text=_VARS['text'], method=_VARS['method'],
                            lang=_VARS['lang'], kp_count=_VARS['kp_count'])
 
-    for i in range(len(_FILES)):
+    for i in range(len(_OUTPARAMS[-3:])):
         tmp = list(dict.fromkeys(pipe[i]))
         tmp_arr = []
-        if _FILES[i] == 'keywords.txt' and _VARS['method'] == _METHODS[1]:
+        if _OUTPARAMS[-3:][i] == 'Keywords' and _VARS['method'] == _METHODS[1]:
             tmp = prep_data(pipe['keywords'])
         for item in tmp:
             if isinstance(item, tuple):
                 tmp_arr.append(item[0])
             else:
                 tmp_arr.append(item)
-        _TMPLST.append((tmp_arr, _FILES[i]))
+        _TMPLST.append((tmp_arr, _OUTPARAMS[-3:][i]))
 
     _VARS['window'].Element('SaveRes').Update(disabled=False)
     updateInterface(3, pipe)
