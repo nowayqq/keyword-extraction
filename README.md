@@ -1,5 +1,5 @@
 # keyword-extraction
 
-Building a desktop application capable of extracting keywords and phrases from news text. 
+Desktop application capable of extracting keywords and phrases from news text. 
 
-Currently under development
+New parsers are not yet expected
